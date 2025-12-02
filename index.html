@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Dünya Altın Konseyi&#39;ne Göre En Çok Altın Rezervine Sahip 50 Ülke</title>
+    
+
+  </head>
+    
+  <body>
+  <!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Küresel Altın Rezervlerinde Zirvedeki 50 Ülke ve Kuruluş (2025, Wikipedia)</title>
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        crossorigin=""
+    />
+    <style>
+        html, body {
+            margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            flex-direction: row;
+        }
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1100;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.3);
+            font-size: 16px;
+            max-width: 300px;
+        }
+        #map, #wiki {
+            height: 100vh;
+            width: 50vw;
+            box-sizing: border-box;
+        }
+        #map {
+            border-right: 2px solid #ccc;
+        }
+        #wiki iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+        select {
+            width: 100%;
+            font-size: 16px;
+            margin-top: 8px;
+            padding: 4px;
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            #controls {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                box-sizing: border-box;
+                border-radius: 0;
+                padding: 10px 15px;
+                text-align: center;
+                font-size: 14px;
+                z-index: 1200;
+                max-width: none;
+            }
+            #map, #wiki {
+                width: 100vw;
+                height: calc(50vh - 25px);
+            }
+            #map {
+                border-right: none;
+                border-bottom: 2px solid #ccc;
+                margin-top: 50px;
+            }
+            #wiki {
+                height: calc(50vh - 25px);
+            }
+            .leaflet-control-zoom {
+                top: 70px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        Küresel Altın Rezervlerinde Zirvedeki 50 Ülke ve Kuruluşlar (2025, Wikipedia)<br />
+        <select id="countrySelect">
+            <option value="">-- Bir ülke seçin --</option>
+        </select>
+    </div>
+
+    <div id="map"></div>
+    <div id="wiki">
+        <iframe
+            id="wikiFrame"
+            src="https://en.wikipedia.org/wiki/Gold_reserve"
+            title="Wikipedia"
+            sandbox="allow-same-origin allow-scripts allow-popups"
+        ></iframe>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script>
+        const countries = [
+          {name: "ABD", reserves: 8133.5, lat: 37.0902, lng: -95.7129, wiki: "Amerika_Birleşik_Devletleri"},
+          {name: "Almanya", reserves: 3350.2, lat: 51.1657, lng: 10.4515, wiki: "Almanya"},
+          {name: "İtalya", reserves: 2451.8, lat: 41.8719, lng: 12.5674, wiki: "İtalya"},
+          {name: "Fransa", reserves: 2437.0, lat: 46.2276, lng: 2.2137, wiki: "Fransa"},
+          {name: "Rusya", reserves: 2332.7, lat: 61.5240, lng: 105.3188, wiki: "Rusya"},
+          {name: "Çin", reserves: 2298.5, lat: 35.8617, lng: 104.1954, wiki: "Çin"},
+          {name: "İsviçre", reserves: 1039.9, lat: 46.8182, lng: 8.2275, wiki: "İsviçre"},
+          {name: "Hindistan", reserves: 900.0, lat: 20.5937, lng: 78.9629, wiki: "Hindistan"},
+          {name: "Japonya", reserves: 845.9, lat: 36.2048, lng: 138.2529, wiki: "Japonya"},
+          {name: "Türkiye", reserves: 634.7, lat: 38.9637, lng: 35.2433, wiki: "Türkiye"},
+          {name: "Hollanda", reserves: 612.4, lat: 52.1326, lng: 5.2913, wiki: "Hollanda"},
+          {name: "Polonya", reserves: 530.2, lat: 51.9194, lng: 19.1451, wiki: "Polonya"},
+          {name: "Tayvan", reserves: 422.4, lat: 23.6978, lng: 120.9605, wiki: "Tayvan"},
+          {name: "Portekiz", reserves: 382.6, lat: 39.3999, lng: -8.2245, wiki: "Portekiz"},
+          {name: "Özbekistan", reserves: 364.5, lat: 41.3775, lng: 64.5853, wiki: "Özbekistan"},
+          {name: "Suudi Arabistan", reserves: 323.1, lat: 23.8859, lng: 45.0792, wiki: "Suudi_Arabistan"},
+          {name: "Birleşik Krallık", reserves: 310.2, lat: 55.3781, lng: -3.4360, wiki: "Birleşik_Krallık"},
+          {name: "Kazakistan", reserves: 306.1, lat: 48.0196, lng: 66.9237, wiki: "Kazakistan"},
+          {name: "Lübnan", reserves: 286, lat: 33.8547, lng: 35.8623, wiki: "Lübnan"},
+          {name: "İspanya", reserves: 281.5, lat: 40.4637, lng: -3.7492, wiki: "İspanya"},
+          {name: "Avusturya", reserves: 279.9, lat: 47.5162, lng: 14.5501, wiki: "Avusturya"},
+          {name: "Tayland", reserves: 234.5, lat: 15.8700, lng: 100.9925, wiki: "Tayland"},
+          {name: "Belçika", reserves: 227.4, lat: 50.8503, lng: 4.3517, wiki: "Belçika"},
+          {name: "Singapur", reserves: 204.1, lat: 1.3521, lng: 103.8198, wiki: "Singapur"},
+          {name: "Cezayir", reserves: 173.5, lat: 28.0339, lng: 1.6596, wiki: "Cezayir"},
+          {name: "Venezuela", reserves: 161.2, lat: 6.4238, lng: -66.5897, wiki: "Venezuela"},
+          {name: "Libya", reserves: 146.6, lat: 26.3351, lng: 17.2283, wiki: "Libya"},
+          {name: "Filipinler", reserves: 129.7, lat: 12.8797, lng: 121.7740, wiki: "Filipinler"},
+          {name: "Brezilya", reserves: 129.6, lat: -14.2350, lng: -51.9253, wiki: "Brezilya"},
+          {name: "Mısır", reserves: 128.5, lat: 26.8206, lng: 30.8025, wiki: "Mısır"},
+          {name: "İsveç", reserves: 125.7, lat: 60.1282, lng: 18.6435, wiki: "İsveç"},
+          {name: "Güney Afrika", reserves: 125.4, lat: -30.5595, lng: 22.9375, wiki: "Güney_Afrika"},
+          {name: "Meksika", reserves: 120.1, lat: 23.6345, lng: -102.5528, wiki: "Meksika"},
+          {name: "Katar", reserves: 116.1, lat: 25.3548, lng: 51.1839, wiki: "Katar"},
+          {name: "Yunanistan", reserves: 114.5, lat: 39.0742, lng: 21.8243, wiki: "Yunanistan"},
+          {name: "Macaristan", reserves: 110.0, lat: 47.1625, lng: 19.5033, wiki: "Macaristan"},
+          {name: "Güney Kore", reserves: 104.4, lat: 35.9078, lng: 127.7669, wiki: "Güney_Kore"},
+          {name: "Romanya", reserves: 103.6, lat: 45.9432, lng: 24.9668, wiki: "Romanya"},
+          {name: "Uluslararası Hesaplaşma Bankası", reserves: 102.0, lat: 46.9481, lng: 7.4474, wiki: "Uluslararası_Hesaplaşma_Bankası"},
+          {name: "Avustralya", reserves: 79.8, lat: -25.2744, lng: 133.7751, wiki: "Avustralya"},
+          {name: "Kuveyt", reserves: 79.0, lat: 29.3759, lng: 47.9774, wiki: "Kuveyt"},
+          {name: "Endonezya", reserves: 78.6, lat: -0.7893, lng: 113.9213, wiki: "Endonezya"},
+          {name: "Birleşik Arap Emirlikleri", reserves: 74.5, lat: 23.4241, lng: 53.8478, wiki: "Birleşik_Arap_Emirlikleri"},
+          {name: "Ürdün", reserves: 72.8, lat: 30.5852, lng: 36.2384, wiki: "Ürdün"},
+          {name: "Danimarka", reserves: 66.5, lat: 56.2639, lng: 9.5018, wiki: "Danimarka"},
+          {name: "Pakistan", reserves: 64.7, lat: 30.3753, lng: 69.3451, wiki: "Pakistan"},
+          {name: "Arjantin", reserves: 61.7, lat: -38.4161, lng: -63.6167, wiki: "Arjantin"},
+          {name: "Belarus", reserves: 53.8, lat: 53.7098, lng: 27.9534, wiki: "Belarus"},
+          {name: "Sırbistan", reserves: 52.2, lat: 44.0165, lng: 21.0059, wiki: "Sırbistan"},
+          {name: "Finlandiya", reserves: 43.7, lat: 61.9241, lng: 25.7482, wiki: "Finlandiya"},
+          {name: "Bulgaristan", reserves: 40.8, lat: 42.7339, lng: 25.4858, wiki: "Bulgaristan"},
+          {name: "Euro bölgesi (Avrupa Merkez Bankası dahil)", reserves: 10771.5, lat: 50.1109, lng: 8.6821, wiki: "Euro_bölgesi"},
+          {name: "Uluslararası Para Fonu(IMF)", reserves: 2814.0, lat: 38.9072, lng: -77.0369, wiki: "Uluslararası_Para_Fonu"},
+          {name: "Avrupa Merkez Bankası", reserves: 506.5, lat: 50.1109, lng: 8.6821, wiki: "Avrupa_Merkez_Bankası"},
+          
+        ];
+
+        // Rezerv büyüklüğüne göre büyükten küçüğe sırala
+        countries.sort((a, b) => b.reserves - a.reserves);
+
+        // Harita başlatma
+        const map = L.map('map').setView([20, 0], 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> katkıcıları'
+        }).addTo(map);
+
+        let markers = [];
+        const select = document.getElementById('countrySelect');
+
+        // Listeye seçenekleri rezerv sırasına göre 1,2,3... olarak ekle
+        countries.forEach((country, i) => {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `${i + 1}. ${country.name} (${country.reserves.toLocaleString()} ton)`;
+            select.appendChild(option);
+        });
+
+        // Markerları ekle ve popup ayarla
+        countries.forEach((country, i) => {
+            const marker = L.marker([country.lat, country.lng]).addTo(map);
+            marker.bindPopup(`<b>${country.name}</b><br>Altın Rezervi: ${country.reserves.toLocaleString()} ton<br><a href="https://tr.wikipedia.org/wiki/${country.wiki}" target="_blank" rel="noopener noreferrer">Wikipedia</a>`);
+            marker.on('click', () => {
+                select.value = i;
+                showWiki(country.wiki);
+                map.setView([country.lat, country.lng], 5);
+                marker.openPopup();
+            });
+            markers.push(marker);
+        });
+
+        function showWiki(wikiPage) {
+            document.getElementById('wikiFrame').src = `https://tr.wikipedia.org/wiki/${wikiPage}`;
+        }
+
+        select.addEventListener('change', () => {
+            const idx = parseInt(select.value);
+            if (isNaN(idx)) {
+                map.setView([20, 0], 2);
+                document.getElementById('wikiFrame').src = "https://en.wikipedia.org/wiki/Gold_reserve";
+                return;
+            }
+            const country = countries[idx];
+            map.setView([country.lat, country.lng], 5);
+            markers[idx].openPopup();
+            showWiki(country.wiki);
+        });
+
+        // Başlangıçta genel wiki sayfası
+        document.getElementById('wikiFrame').src = "https://en.wikipedia.org/wiki/Gold_reserve";
+    </script>
+</body>
+</html>
+    
+  </body>
+  
+</html>
